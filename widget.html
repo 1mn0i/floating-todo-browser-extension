@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悬浮待办 · 工作小工具</title>
+<style>
+  :root {
+    --paper: #f7efdf;
+    --paper-2: #efe3ca;
+    --ink: #3b2f22;
+    --muted: #8a7a63;
+    --teal: #0e7c72;
+    --teal-dark: #0a5f58;
+    --amber: #e89b2b;
+    --line: rgba(120, 92, 52, 0.18);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(232, 155, 43, 0.16), transparent 30%),
+      radial-gradient(circle at 88% 18%, rgba(14, 124, 114, 0.14), transparent 34%),
+      linear-gradient(155deg, var(--paper) 0%, #fbf5ea 55%, var(--paper-2) 100%);
+    background-attachment: fixed;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(59, 47, 34, 0.10) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.45;
+  }
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(760px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 44px 0 120px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--teal-dark);
+  }
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 5px rgba(232, 155, 43, 0.16);
+  }
+  h1 {
+    margin: 30px 0 14px;
+    font-size: clamp(34px, 7vw, 58px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--teal);
+  }
+  .lede {
+    margin: 0 0 34px;
+    max-width: 560px;
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+  .step {
+    padding: 18px 16px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+  }
+  .step b {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: #fff;
+    background: var(--teal);
+    font-size: 13px;
+  }
+  .step p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .install {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    background: #fffdf7;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(59, 47, 34, 0.08);
+  }
+  .install-copy {
+    flex: 1 1 320px;
+  }
+  .install-copy h2 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+  .install-copy p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--muted);
+  }
+  .bookmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: grab;
+    box-shadow: 0 8px 18px rgba(14, 124, 114, 0.28);
+  }
+  .bookmark:active { cursor: grabbing; }
+  .copy-btn {
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--teal-dark);
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: #f6f0e4; }
+  .hint {
+    min-height: 20px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--teal-dark);
+  }
+  .manual {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .manual summary {
+    cursor: pointer;
+    color: var(--teal-dark);
+  }
+  .manual textarea {
+    width: 100%;
+    height: 96px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    resize: vertical;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    background: #fbf7ee;
+  }
+  .note {
+    margin-top: 26px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .steps { grid-template-columns: 1fr; }
+    .wrap { padding-top: 30px; }
+  }
+
+  /* Extension iframe mode: show only the widget and share storage by extension origin. */
+  body > .wrap { display:none; }
+  body { background:transparent; min-height:100%; overflow:hidden; }
+  #__ft-root { right:8px !important; bottom:8px !important; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="brand"><span class="brand-dot"></span>FT · 悬浮待办</span>
+    <h1>把待办，<em>浮在工作页上</em></h1>
+    <p class="lede">右下角这张小卡片就是工具本体。它默认很小、可折叠、可拖动，添加和完成都只占一点空间，不打断你手头的工作。</p>
+
+    <div class="steps">
+      <div class="step"><b>1</b><p>直接拖右下角卡片，把它放到不碍事的位置。</p></div>
+      <div class="step"><b>2</b><p>输入待办按回车；点圆圈完成，点文字可编辑，清空即可删除。</p></div>
+      <div class="step"><b>3</b><p>点顶部箭头可折叠成一条小胶囊，需要时再展开。</p></div>
+    </div>
+
+    <div class="install">
+      <div class="install-copy">
+        <h2>想让它在任意网页上悬浮？</h2>
+        <p>把右边的按钮拖到浏览器书签栏，之后在任意工作页点一下，即可把待办悬浮到当前页面。</p>
+      </div>
+      <a class="bookmark" id="bookmarklet" href="#" draggable="true">⇱ 悬浮待办</a>
+      <button class="copy-btn" id="copy-bookmarklet" type="button">复制书签代码</button>
+      <div class="hint" id="hint"></div>
+      <details class="manual" style="flex-basis:100%">
+        <summary>拖拽无效？点这里手动复制书签代码</summary>
+        <textarea id="bookmark-code" readonly></textarea>
+      </details>
+    </div>
+
+    <p class="note">数据只保存在本机浏览器里，不会上传到任何地方。注入到不同网站时，数据按网站分别保存；直接打开本页面使用时，数据始终保存在这个文件对应的浏览器存储中。</p>
+  </div>
+<script src="widget.js"></script>
+</body>
+</html>
